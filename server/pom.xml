@@ -18,6 +18,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 	<properties>
 		<java.version>11</java.version>
 		<spring-data-bom.version>2021.0.2</spring-data-bom.version>
+		<spring-native.version>0.10.0</spring-native.version>
 	</properties>
 
 	<dependencyManagement>
@@ -71,7 +72,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-rest-hal-explorer</artifactId>
-			<scope>runtime</scope>
+			<!--<scope>runtime</scope>-->
 		</dependency>
 
 		<dependency>
@@ -124,11 +125,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 
 		<!-- Misc -->
 
+		<!--
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>org.javamoney.moneta</groupId>
@@ -146,6 +149,20 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 			<artifactId>json-path</artifactId>
 		</dependency>
 
+		<!-- Spring native -->
+
+		<dependency>
+			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-native</artifactId>
+			<version>${spring-native.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-native-configuration</artifactId>
+			<version>${spring-native.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -156,13 +173,21 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<executable>true</executable>
+					<image>
+						<builder>paketobuildpacks/builder:tiny</builder>
+						<env>
+							<BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+						</env>
+					</image>
 				</configuration>
 				<dependencies>
+					<!-- 
 					<dependency>
 						<groupId>org.springframework.boot.experimental</groupId>
 						<artifactId>spring-boot-thin-layout</artifactId>
-						<version>1.0.27.BUILD-SNAPSHOT</version>
+						<version>1.0.27.RELEASE</version>
 					</dependency>
+					-->
 				</dependencies>
 			</plugin>
 
@@ -186,6 +211,26 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 				</dependencies>
 			</plugin>
 
+			<plugin>
+				<groupId>org.springframework.experimental</groupId>
+				<artifactId>spring-aot-maven-plugin</artifactId>
+				<version>${spring-native.version}</version>
+				<executions>
+					<execution>
+						<id>generate</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>test-generate</id>
+						<goals>
+							<goal>test-generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 
@@ -201,6 +246,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		<repository>
+			<id>spring-release</id>
+			<url>https://repo.spring.io/release</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -211,6 +263,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 		<pluginRepository>
 			<id>spring-milestone</id>
 			<url>https://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>spring-release</id>
+			<url>https://repo.spring.io/release</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
