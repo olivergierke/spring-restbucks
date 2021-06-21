@@ -16,15 +16,8 @@
 package org.springsource.restbucks;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.SynthesizedAnnotation;
-import org.springframework.nativex.hint.AccessBits;
 import org.springframework.nativex.hint.AotProxyHint;
-import org.springframework.nativex.hint.JdkProxyHint;
-import org.springframework.nativex.hint.NativeHint;
 import org.springframework.nativex.hint.ProxyBits;
-import org.springframework.nativex.hint.TypeHint;
-import org.springframework.transaction.event.TransactionalEventListener;
 import org.springsource.restbucks.drinks.Drink;
 
 /**
@@ -33,21 +26,7 @@ import org.springsource.restbucks.drinks.Drink;
  * @author Oliver Drotbohm
  */
 @Configuration
-// Standard user component requiring proxying due to @Async
-@AotProxyHint(targetClassName = "org.springsource.restbucks.engine.Engine", proxyFeatures = ProxyBits.IS_STATIC)
 
 // Due to DrinksOptions.BY_NAME (i.e. the usage of a domain type with Spring Data's TypedSort)
 @AotProxyHint(targetClass = Drink.class, proxyFeatures = ProxyBits.IS_STATIC)
-
-// Referred to by a custom AttributeConverter
-// https://github.com/spring-projects-experimental/spring-native/issues/829
-@TypeHint(types = { org.javamoney.moneta.Money.class }, access = AccessBits.LOAD_AND_CONSTRUCT)
-
-// Needed to get @TransactionalEventListener on Engine.process(…) working
-// https://github.com/spring-projects-experimental/spring-native/issues/828
-@TypeHint(types = { EventListener.class, TransactionalEventListener.class }, access = AccessBits.ANNOTATION)
-// Additional wrapping needed due to https://github.com/spring-projects-experimental/spring-native/issues/830
-@NativeHint( //
-		jdkProxies = @JdkProxyHint(types = { TransactionalEventListener.class, SynthesizedAnnotation.class }) //
-)
 class NativeConfiguration {}
